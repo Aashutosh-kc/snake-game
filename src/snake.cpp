@@ -2,6 +2,9 @@
 void runSnake(sf::RenderWindow& window) {
 
 	const int CELL_SIZE = 20;
+	auto size = window.getSize();
+	const int COLS = size.x / CELL_SIZE;
+	const int ROWS = size.y / CELL_SIZE;
 
 	sf::RectangleShape rect({ 
 		static_cast<float> (CELL_SIZE),
@@ -14,7 +17,7 @@ void runSnake(sf::RenderWindow& window) {
 	sf::Clock clock;
 	float moveInterval = 0.2f;
 
-	sf::Vector2i direction(0, 0);
+	sf::Vector2i direction(1, 0);
 
 	while (window.isOpen()) {
 		while (auto e = window.pollEvent()) {
@@ -37,6 +40,7 @@ void runSnake(sf::RenderWindow& window) {
 			rect.move({ 0.f,5.f });
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
 			rect.move({ 5.f,0.f });*/
+
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
 			direction = { 0,-1 };
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
@@ -50,6 +54,9 @@ void runSnake(sf::RenderWindow& window) {
 		if (clock.getElapsedTime().asSeconds() >= moveInterval) {
 			position += direction;
 			clock.restart();
+
+			if (position.x < 0 || position.y < 0||position.x>=COLS||position.y>=ROWS)
+				window.close();
 		}
 
 		rect.setPosition(
@@ -64,10 +71,7 @@ void runSnake(sf::RenderWindow& window) {
 	}
 }
 int main() {
-	sf::RenderWindow window(
-		sf::VideoMode({ 800,600 }),
-		"Snake"
-	);
+	sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Snake", sf::State::Fullscreen);
 		runSnake(window);
 	return 0;
 }

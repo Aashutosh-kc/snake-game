@@ -22,7 +22,12 @@ void runSnake(sf::RenderWindow& window) {
 		{ static_cast<float> (CELL_SIZE), static_cast<float>(CELL_SIZE) }
 	);
 	food.setFillColor(sf::Color::Red);
-	
+	sf::Font font;
+	font.openFromFile("fonts/regular.ttf");
+	sf::Text scoreText(font);
+	scoreText.setCharacterSize(24);
+	scoreText.setFillColor(sf::Color::White);
+	scoreText.setPosition({ 100.f,100.f });
 
 	sf::Clock clock;
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
@@ -31,7 +36,7 @@ void runSnake(sf::RenderWindow& window) {
 	float moveInterval = 0.2f;
 
 	sf::Vector2i direction(1, 0);
-
+	int score = 0;
 	while (window.isOpen()) {
 		while (auto e = window.pollEvent()) {
 
@@ -75,6 +80,7 @@ void runSnake(sf::RenderWindow& window) {
 			if (foodPos == newHead) {
 				foodPos = { std::rand() % COLS, std::rand() % ROWS };
 				body.push_back(body.back());
+				score++;
 			}
 		}
 		food.setPosition(
@@ -82,6 +88,8 @@ void runSnake(sf::RenderWindow& window) {
 		);
 		
 		window.clear(sf::Color(10, 10, 10));
+		scoreText.setString("Score: " + std::to_string(score));
+		window.draw(scoreText);
 		window.draw(food);
 		for (auto& segment : body) {
 			rect.setPosition(

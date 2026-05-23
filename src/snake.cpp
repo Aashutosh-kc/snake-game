@@ -4,6 +4,8 @@
 #include<deque>
 void runSnake(sf::RenderWindow& window) {
 
+	bool gameOver = false;
+
 	const int CELL_SIZE = 20;
 	auto size = window.getSize();
 	const int COLS = size.x / CELL_SIZE;
@@ -69,20 +71,20 @@ void runSnake(sf::RenderWindow& window) {
 			direction = { 1,0 };
 
 
-		if (clock.getElapsedTime().asSeconds() >= moveInterval) {
+		if (!gameOver && clock.getElapsedTime().asSeconds() >= moveInterval) {
 			sf::Vector2i newHead = body.front() + direction;
 			for (auto& segment : body) 
 			{
 				if (newHead == segment){
-				window.close();
+					gameOver = true;
 				}
 			}
 			body.push_front(newHead);
 			body.pop_back();
 			clock.restart();
 
-			if (newHead.x < 0 || newHead.y < 0|| newHead.x>=COLS|| newHead.y>=ROWS)
-				window.close();
+			if (newHead.x < 0 || newHead.y < 0 || newHead.x >= COLS || newHead.y >= ROWS)
+				gameOver = true;
 			
 			if (foodPos == newHead) {
 				foodPos = { std::rand() % COLS, std::rand() % ROWS };
@@ -91,13 +93,30 @@ void runSnake(sf::RenderWindow& window) {
 			}
 		}
 		food.setPosition(
-			{ static_cast<float>(foodPos.x * CELL_SIZE),static_cast<float>(foodPos.y * CELL_SIZE) }
+		{ static_cast<float>(foodPos.x * CELL_SIZE),
+			static_cast<float>(foodPos.y * CELL_SIZE) }
 		);
 		
 		window.clear(sf::Color(10, 10, 10));
+
+		if (gameOver) {
+			scoreText.setString("Game Over! Score: " + std::to_string(score) + "\nPress R to Restart");
+			sf::FloatRect textBounds = scoreText.getLocalBounds();
+			scoreText.setPosition({
+				static_cast<float>(window.getSize().x / 2) - textBounds.size.x / 2,
+				static_cast<float>(window.getSize().y / 2) - textBounds.size.y / 2
+				});
+		
+			scoreText.setCharacterSize(32);
+			window.draw(scoreText);
+			window.display();
+			continue;
+		}
+
 		scoreText.setString("Score: " + std::to_string(score));
 		window.draw(scoreText);
 		window.draw(food);
+
 		for (auto& segment : body) {
 			rect.setPosition(
 				{
@@ -107,14 +126,11 @@ void runSnake(sf::RenderWindow& window) {
 			);
 			window.draw(rect);
 		}
-
-		
-
 		window.display();
 	}
 }
 int main() {
 	sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Snake", sf::State::Fullscreen);
-		runSnake(window);
+	runSnake(window);
 	return 0;
 }

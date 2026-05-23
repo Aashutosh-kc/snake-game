@@ -71,12 +71,19 @@ void runSnake(sf::RenderWindow& window) {
 
 		if (clock.getElapsedTime().asSeconds() >= moveInterval) {
 			sf::Vector2i newHead = body.front() + direction;
+			for (auto& segment : body) 
+			{
+				if (newHead == segment){
+				window.close();
+				}
+			}
 			body.push_front(newHead);
 			body.pop_back();
 			clock.restart();
 
 			if (newHead.x < 0 || newHead.y < 0|| newHead.x>=COLS|| newHead.y>=ROWS)
 				window.close();
+			
 			if (foodPos == newHead) {
 				foodPos = { std::rand() % COLS, std::rand() % ROWS };
 				body.push_back(body.back());

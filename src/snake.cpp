@@ -1,4 +1,6 @@
 #include <SFML/Graphics.hpp>
+#include<cstdlib>
+#include<ctime>
 void runSnake(sf::RenderWindow& window) {
 
 	const int CELL_SIZE = 20;
@@ -14,7 +16,16 @@ void runSnake(sf::RenderWindow& window) {
 	rect.setFillColor(sf::Color::White);
 	sf::Vector2i position(5, 5);
 	
+	sf::RectangleShape food(
+		{ static_cast<float> (CELL_SIZE), static_cast<float>(CELL_SIZE) }
+	);
+	food.setFillColor(sf::Color::Red);
+	
+
 	sf::Clock clock;
+	std::srand(static_cast<unsigned>(std::time(nullptr)));
+	sf::Vector2i foodPos(std::rand() % COLS, std::rand() % ROWS);
+
 	float moveInterval = 0.2f;
 
 	sf::Vector2i direction(1, 0);
@@ -57,8 +68,13 @@ void runSnake(sf::RenderWindow& window) {
 
 			if (position.x < 0 || position.y < 0||position.x>=COLS||position.y>=ROWS)
 				window.close();
+			if (foodPos == position)
+				
+				foodPos = { std::rand() % COLS, std::rand() % ROWS };
 		}
-
+		food.setPosition(
+			{ static_cast<float>(foodPos.x * CELL_SIZE),static_cast<float>(foodPos.y * CELL_SIZE) }
+		);
 		rect.setPosition(
 			{
 			static_cast<float>(position.x * CELL_SIZE),
@@ -66,6 +82,7 @@ void runSnake(sf::RenderWindow& window) {
 			}
 		);
 		window.clear(sf::Color(10, 10, 10));
+		window.draw(food);
 		window.draw(rect);
 		window.display();
 	}

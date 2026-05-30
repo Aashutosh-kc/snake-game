@@ -14,6 +14,40 @@ void runSnake(sf::RenderWindow& window) {
 	const int OFFSETX = (size.x - PLAY_WIDTH) / 2;
 	const int OFFSETY = (size.y - PLAY_HEIGHT) / 2;
 
+	sf::Texture offsetTexture;
+	offsetTexture.loadFromFile("./assets/offset.png");
+	offsetTexture.setRepeated(true);
+	sf::Sprite offsetSprite(offsetTexture);
+	offsetSprite.setTextureRect(sf::IntRect(
+		{ 0,0},{(int)size.x,(int)size.y}));
+	offsetSprite.setPosition({ 0.f,0.f });
+
+	sf::Texture grassTexture;
+	grassTexture.loadFromFile("assets/grass.png");
+	grassTexture.setRepeated(true);
+	sf::Sprite grassSprite(grassTexture);
+	grassSprite.setTextureRect(sf::IntRect(
+		{ 0,0 },
+		{ PLAY_WIDTH, PLAY_HEIGHT }
+	));
+
+	sf::RectangleShape border({
+			static_cast<float>(PLAY_WIDTH),
+			static_cast<float>(PLAY_HEIGHT)
+		});
+	border.setFillColor(sf::Color::Transparent);
+	border.setOutlineColor(sf::Color::Green);
+	border.setOutlineThickness(2.f);
+	border.setPosition({
+		static_cast<float>(OFFSETX),
+		static_cast<float>(OFFSETY)
+		});
+
+	grassSprite.setPosition({
+		static_cast<float>(OFFSETX),
+		static_cast<float>(OFFSETY)
+		});
+
 	std::deque<sf::Vector2i> body;
 	body.push_front({ 5, 5 });
 
@@ -98,18 +132,9 @@ void runSnake(sf::RenderWindow& window) {
 			});
 
 		window.clear(sf::Color(10, 10, 10));
-
-		sf::RectangleShape border({
-			static_cast<float>(PLAY_WIDTH),
-			static_cast<float>(PLAY_HEIGHT)
-			});
-		border.setFillColor(sf::Color::Transparent);
-		border.setOutlineColor(sf::Color::Green);
-		border.setOutlineThickness(2.f);
-		border.setPosition({
-			static_cast<float>(OFFSETX),
-			static_cast<float>(OFFSETY)
-			});
+		window.draw(offsetSprite);
+		window.draw(grassSprite);
+		
 		window.draw(border);
 		if (gameOver) {
 			scoreText.setCharacterSize(32);

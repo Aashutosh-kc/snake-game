@@ -3,7 +3,7 @@ A classic snake game featuring score tracking and audio functionality made using
 
 ## Tech Stack
 ![C++](https://img.shields.io/badge/C++-17-blue)
-![SFML](https://img.shields.io/badge/SFML-3.00-green)
+![SFML](https://img.shields.io/badge/SFML-3.0.2-green)
 
 ## Current Phase
 - Moving snake with fixed play area and offset and grass assets loaded

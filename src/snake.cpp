@@ -31,22 +31,65 @@ void runSnake(sf::RenderWindow& window) {
 		{ PLAY_WIDTH, PLAY_HEIGHT }
 	));
 
-	sf::RectangleShape border({
-			static_cast<float>(PLAY_WIDTH),
-			static_cast<float>(PLAY_HEIGHT)
-		});
-	border.setFillColor(sf::Color::Transparent);
-	border.setOutlineColor(sf::Color::Green);
-	border.setOutlineThickness(2.f);
-	border.setPosition({
+	sf::Texture borderHorizontal1Texture;
+	borderHorizontal1Texture.loadFromFile("assets/border_horizontal1.png");
+	borderHorizontal1Texture.setRepeated(true);
+	sf::Sprite borderHorizontal1Sprite(borderHorizontal1Texture);
+	borderHorizontal1Sprite.setTextureRect(sf::IntRect(
+		{ 0, 0 },
+		{ PLAY_WIDTH, CELL_SIZE }
+	));
+	borderHorizontal1Sprite.setPosition({
 		static_cast<float>(OFFSETX),
+		static_cast<float>(OFFSETY- CELL_SIZE)
+		});
+
+	sf::Texture borderVertical1Texture;
+	borderVertical1Texture.loadFromFile("assets/border_vertical.png");
+	borderVertical1Texture.setRepeated(true);
+	sf::Sprite borderVertical1Sprite(borderVertical1Texture);
+	borderVertical1Sprite.setTextureRect(sf::IntRect(
+		{0,0},
+		{CELL_SIZE,PLAY_HEIGHT}
+	));
+	borderVertical1Sprite.setPosition({
+		static_cast<float>(OFFSETX- CELL_SIZE),
 		static_cast<float>(OFFSETY)
 		});
+
+	sf::Texture borderHorizontal2Texture;
+	borderHorizontal2Texture.loadFromFile("assets/border_horizontal.png");
+	borderHorizontal2Texture.setRepeated(true);
+	sf::Sprite borderHorizontal2Sprite(borderHorizontal2Texture);
+	borderHorizontal2Sprite.setTextureRect(sf::IntRect(
+		{ 0, 0 },
+		{ PLAY_WIDTH, CELL_SIZE } 
+	));
+	borderHorizontal2Sprite.setPosition({
+		static_cast<float>(OFFSETX),
+		static_cast<float>(OFFSETY + PLAY_HEIGHT) 
+		});
+
+	sf::Texture borderVertical2Texture;
+	borderVertical2Texture.loadFromFile("assets/border_vertical2.png");
+	borderVertical2Texture.setRepeated(true);
+	sf::Sprite borderVertical2Sprite(borderVertical2Texture);
+	borderVertical2Sprite.setTextureRect(sf::IntRect(
+		{ 0,0 },
+		{ CELL_SIZE,PLAY_HEIGHT }
+	));
+	borderVertical2Sprite.setPosition({
+		static_cast<float>(OFFSETX + PLAY_WIDTH),
+		static_cast<float>(OFFSETY)
+		});
+
 
 	grassSprite.setPosition({
 		static_cast<float>(OFFSETX),
 		static_cast<float>(OFFSETY)
 		});
+
+
 
 	std::deque<sf::Vector2i> body;
 	body.push_front({ 5, 5 });
@@ -134,8 +177,10 @@ void runSnake(sf::RenderWindow& window) {
 		window.clear(sf::Color(10, 10, 10));
 		window.draw(offsetSprite);
 		window.draw(grassSprite);
-		
-		window.draw(border);
+		window.draw(borderHorizontal1Sprite);
+		window.draw(borderVertical1Sprite);
+		window.draw(borderHorizontal2Sprite);
+		window.draw(borderVertical2Sprite);
 		if (gameOver) {
 			scoreText.setCharacterSize(32);
 			scoreText.setString("Game Over! Score: " + std::to_string(score) + "\nPress R to Restart");
@@ -154,7 +199,7 @@ void runSnake(sf::RenderWindow& window) {
 		scoreText.setPosition({ 10.f, 10.f });
 		window.draw(scoreText);
 		window.draw(food);
-
+		
 		for (auto& segment : body) {
 			rect.setPosition({
 				static_cast<float>(OFFSETX + segment.x * CELL_SIZE),

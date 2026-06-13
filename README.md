@@ -6,7 +6,8 @@ A classic snake game featuring score tracking and audio functionality made using
 ![SFML](https://img.shields.io/badge/SFML-3.0.2-green)
 
 ## Current Phase
-- Moving snake with fixed play area and offset and grass assets loaded
+- Add redefined assets for snake and food
+
 ## Planned features
 - Add border and snake sprite instead of rectangle.
 ## Minimum Requirements

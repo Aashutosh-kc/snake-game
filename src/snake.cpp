@@ -1,7 +1,71 @@
 #include <SFML/Graphics.hpp>
 #include <cstdlib>
 #include <ctime>
-#include <deque>
+#include "Snake.h"
+
+Snake::Snake(sf::Vector2i startPos, sf::Vector2i startDir, int cols, int rows)
+	: cols(cols), rows(rows) {
+	reset(startPos, startDir);
+	respawnFood();
+}
+
+void Snake::reset(sf::Vector2i startPos, sf::Vector2i startDir) {
+	body.clear();
+	body.push_front(startPos);
+	direction = startDir;
+}
+
+void Snake::setDirection(sf::Vector2i dir) {
+	direction = dir;
+}
+
+void Snake::move() {
+	sf::Vector2i newHead = body.front() + direction;
+	body.push_front(newHead);
+	body.pop_back();
+}
+
+void Snake::grow() {
+	// Duplicate the last segment so the snake doesn't shrink back
+	// after the next move() pops it off.
+	body.push_back(body.back());
+}
+
+bool Snake::checkSelfCollision() const {
+	sf::Vector2i head = body.front();
+	for (size_t i = 1; i < body.size(); ++i) {
+		if (body[i] == head)
+			return true;
+	}
+	return false;
+}
+
+bool Snake::checkWallCollision() const {
+	sf::Vector2i head = body.front();
+	return head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows;
+}
+
+bool Snake::checkFoodCollision() const {
+	return body.front() == foodPos;
+}
+
+void Snake::respawnFood() {
+	foodPos = { std::rand() % cols, std::rand() % rows };
+}
+
+sf::Vector2i Snake::getFoodPosition() const {
+	return foodPos;
+}
+
+const std::deque<sf::Vector2i>& Snake::getBody() const {
+	return body;
+}
+
+sf::Vector2i Snake::getHead() const {
+	return body.front();
+}
+
+// ---------------- Game loop ----------------
 
 void runSnake(sf::RenderWindow& window) {
 	bool gameOver = false;
@@ -19,7 +83,7 @@ void runSnake(sf::RenderWindow& window) {
 	offsetTexture.setRepeated(true);
 	sf::Sprite offsetSprite(offsetTexture);
 	offsetSprite.setTextureRect(sf::IntRect(
-		{ 0,0},{(int)size.x,(int)size.y}));
+		{ 0,0 }, { (int)size.x,(int)size.y }));
 	offsetSprite.setPosition({ 0.f,0.f });
 
 	sf::Texture grassTexture;
@@ -41,7 +105,7 @@ void runSnake(sf::RenderWindow& window) {
 	));
 	borderHorizontal1Sprite.setPosition({
 		static_cast<float>(OFFSETX),
-		static_cast<float>(OFFSETY- CELL_SIZE)
+		static_cast<float>(OFFSETY - CELL_SIZE)
 		});
 
 	sf::Texture borderVertical1Texture;
@@ -49,11 +113,11 @@ void runSnake(sf::RenderWindow& window) {
 	borderVertical1Texture.setRepeated(true);
 	sf::Sprite borderVertical1Sprite(borderVertical1Texture);
 	borderVertical1Sprite.setTextureRect(sf::IntRect(
-		{0,0},
-		{CELL_SIZE,PLAY_HEIGHT}
+		{ 0,0 },
+		{ CELL_SIZE,PLAY_HEIGHT }
 	));
 	borderVertical1Sprite.setPosition({
-		static_cast<float>(OFFSETX- CELL_SIZE),
+		static_cast<float>(OFFSETX - CELL_SIZE),
 		static_cast<float>(OFFSETY)
 		});
 
@@ -63,11 +127,11 @@ void runSnake(sf::RenderWindow& window) {
 	sf::Sprite borderHorizontal2Sprite(borderHorizontal2Texture);
 	borderHorizontal2Sprite.setTextureRect(sf::IntRect(
 		{ 0, 0 },
-		{ PLAY_WIDTH, CELL_SIZE } 
+		{ PLAY_WIDTH, CELL_SIZE }
 	));
 	borderHorizontal2Sprite.setPosition({
 		static_cast<float>(OFFSETX),
-		static_cast<float>(OFFSETY + PLAY_HEIGHT) 
+		static_cast<float>(OFFSETY + PLAY_HEIGHT)
 		});
 
 	sf::Texture borderVertical2Texture;
@@ -83,16 +147,10 @@ void runSnake(sf::RenderWindow& window) {
 		static_cast<float>(OFFSETY)
 		});
 
-
 	grassSprite.setPosition({
 		static_cast<float>(OFFSETX),
 		static_cast<float>(OFFSETY)
 		});
-
-
-
-	std::deque<sf::Vector2i> body;
-	body.push_front({ 5, 5 });
 
 	sf::RectangleShape rect({
 		static_cast<float>(CELL_SIZE),
@@ -100,11 +158,11 @@ void runSnake(sf::RenderWindow& window) {
 		});
 	rect.setFillColor(sf::Color::White);
 
-	sf::RectangleShape food({
+	sf::RectangleShape foodShape({
 		static_cast<float>(CELL_SIZE),
 		static_cast<float>(CELL_SIZE)
 		});
-	food.setFillColor(sf::Color::Red);
+	foodShape.setFillColor(sf::Color::Red);
 
 	sf::Font font;
 	font.openFromFile("fonts/regular.ttf");
@@ -115,10 +173,12 @@ void runSnake(sf::RenderWindow& window) {
 
 	sf::Clock clock;
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
-	sf::Vector2i foodPos(std::rand() % COLS, std::rand() % ROWS);
+
 	float moveInterval = 0.2f;
-	sf::Vector2i direction(1, 0);
 	int score = 0;
+
+	// --- OOP: snake body, movement, and food all live in this one object ---
+	Snake snake({ 5, 5 }, { 1, 0 }, COLS, ROWS);
 
 	while (window.isOpen()) {
 		while (auto e = window.pollEvent()) {
@@ -129,49 +189,43 @@ void runSnake(sf::RenderWindow& window) {
 				if (key == sf::Keyboard::Key::Escape)
 					window.close();
 				if (key == sf::Keyboard::Key::R && gameOver) {
-					body.clear();
-					body.push_front({ 5, 5 });
-					direction = { 1, 0 };
+					snake.reset({ 5, 5 }, { 1, 0 });
 					score = 0;
 					gameOver = false;
-					foodPos = { std::rand() % COLS, std::rand() % ROWS };
+					snake.respawnFood();
 				}
 			}
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-			direction = { 0, -1 };
+			snake.setDirection({ 0, -1 });
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-			direction = { -1, 0 };
+			snake.setDirection({ -1, 0 });
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-			direction = { 0, 1 };
+			snake.setDirection({ 0, 1 });
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-			direction = { 1, 0 };
+			snake.setDirection({ 1, 0 });
 
 		if (!gameOver && clock.getElapsedTime().asSeconds() >= moveInterval) {
-			sf::Vector2i newHead = body.front() + direction;
-			for (auto& segment : body) {
-				if (newHead == segment) {
-					gameOver = true;
-				}
-			}
-			body.push_front(newHead);
-			body.pop_back();
+			snake.move();
 			clock.restart();
 
-			if (newHead.x < 0 || newHead.y < 0 || newHead.x >= COLS || newHead.y >= ROWS)
+			if (snake.checkSelfCollision())
 				gameOver = true;
 
-			if (foodPos == newHead) {
-				foodPos = { std::rand() % COLS, std::rand() % ROWS };
-				body.push_back(body.back());
+			if (snake.checkWallCollision())
+				gameOver = true;
+
+			if (snake.checkFoodCollision()) {
+				snake.respawnFood();
+				snake.grow();
 				score++;
 			}
 		}
 
-		food.setPosition({
-			static_cast<float>(OFFSETX + foodPos.x * CELL_SIZE),
-			static_cast<float>(OFFSETY + foodPos.y * CELL_SIZE)
+		foodShape.setPosition({
+			static_cast<float>(OFFSETX + snake.getFoodPosition().x * CELL_SIZE),
+			static_cast<float>(OFFSETY + snake.getFoodPosition().y * CELL_SIZE)
 			});
 
 		window.clear(sf::Color(10, 10, 10));
@@ -181,6 +235,7 @@ void runSnake(sf::RenderWindow& window) {
 		window.draw(borderVertical1Sprite);
 		window.draw(borderHorizontal2Sprite);
 		window.draw(borderVertical2Sprite);
+
 		if (gameOver) {
 			scoreText.setCharacterSize(32);
 			scoreText.setString("Game Over! Score: " + std::to_string(score) + "\nPress R to Restart");
@@ -198,9 +253,9 @@ void runSnake(sf::RenderWindow& window) {
 		scoreText.setString("Score: " + std::to_string(score));
 		scoreText.setPosition({ 10.f, 10.f });
 		window.draw(scoreText);
-		window.draw(food);
-		
-		for (auto& segment : body) {
+		window.draw(foodShape);
+
+		for (auto& segment : snake.getBody()) {
 			rect.setPosition({
 				static_cast<float>(OFFSETX + segment.x * CELL_SIZE),
 				static_cast<float>(OFFSETY + segment.y * CELL_SIZE)
@@ -211,6 +266,7 @@ void runSnake(sf::RenderWindow& window) {
 		window.display();
 	}
 }
+
 
 int main() {
 	sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Snake", sf::State::Fullscreen);

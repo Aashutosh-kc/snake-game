@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <ctime>
 #include "Snake.h"
+#include "HighScore.h"
+#include <filesystem>
 
 Snake::Snake(sf::Vector2i startPos, sf::Vector2i startDir, int cols, int rows)
 	: cols(cols), rows(rows) {
@@ -185,6 +187,7 @@ void runSnake(sf::RenderWindow& window) {
 
 	float moveInterval = 0.2f;
 	int score = 0;
+	int highScore = loadHighScore();
 
 	// --- OOP: snake body, movement, and food all live in this one object ---
 	Snake snake({ 5, 5 }, { 1, 0 }, COLS, ROWS);
@@ -233,6 +236,10 @@ void runSnake(sf::RenderWindow& window) {
 				eatSound.play();
 				snake.grow();
 				score++;
+				if (score > highScore) {
+					highScore = score;
+					saveHighScore(highScore);
+				}
 				
 			}
 		}
@@ -263,7 +270,7 @@ void runSnake(sf::RenderWindow& window) {
 		}
 
 		scoreText.setCharacterSize(24);
-		scoreText.setString("Score: " + std::to_string(score));
+		scoreText.setString("Score: " + std::to_string(score) + "  High Score: " + std::to_string(highScore));
 		scoreText.setPosition({ 
 			static_cast<float>(OFFSETX),
 			static_cast<float>(OFFSETY - 2 * CELL_SIZE ) 

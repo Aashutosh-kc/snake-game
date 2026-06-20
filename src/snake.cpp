@@ -169,7 +169,7 @@ void runSnake(sf::RenderWindow& window) {
 
 	sf::SoundBuffer eatSoundBuffer;
 	sf::Sound eatSound(eatSoundBuffer);
-	if (eatSoundBuffer.loadFromFile("assets/food_crunch.mp3")) {
+	if (eatSoundBuffer.loadFromFile("audio/food_crunch.mp3")) {
 		eatSound.setVolume(100.f);
 	}
 	sf::Font font;

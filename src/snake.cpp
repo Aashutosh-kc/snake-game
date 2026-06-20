@@ -71,6 +71,8 @@ sf::Vector2i Snake::getHead() const {
 // ---------------- Game loop ----------------
 
 void runSnake(sf::RenderWindow& window) {
+
+	int lives = 3;
 	bool gameOver = false;
 	bool isPaused = false;
 	const int CELL_SIZE = 32;
@@ -201,6 +203,7 @@ void runSnake(sf::RenderWindow& window) {
 				if (key == sf::Keyboard::Key::Escape)
 					window.close();
 				if (key == sf::Keyboard::Key::R && gameOver) {
+					lives = 3;
 					snake.reset({ 5, 5 }, { 1, 0 });
 					score = 0;
 					gameOver = false;
@@ -225,11 +228,16 @@ void runSnake(sf::RenderWindow& window) {
 			snake.move();
 			clock.restart();
 
-			if (snake.checkSelfCollision())
-				gameOver = true;
-
-			if (snake.checkWallCollision())
-				gameOver = true;
+			if (snake.checkSelfCollision() || snake.checkWallCollision()) {
+				lives--;
+				if (lives <= 0) {
+					gameOver = true;
+				}
+				else {
+					snake.reset({ 5,5 }, { 1,0 });
+					clock.restart();
+				}
+			}
 
 			if (snake.checkFoodCollision()) {
 				snake.respawnFood();
@@ -270,7 +278,7 @@ void runSnake(sf::RenderWindow& window) {
 		}
 
 		scoreText.setCharacterSize(24);
-		scoreText.setString("Score: " + std::to_string(score) + "  High Score: " + std::to_string(highScore));
+		scoreText.setString("Score: " + std::to_string(score) + "  High Score: " + std::to_string(highScore) + "  Lives: " + std::to_string(lives));
 		scoreText.setPosition({ 
 			static_cast<float>(OFFSETX),
 			static_cast<float>(OFFSETY - 2 * CELL_SIZE ) 

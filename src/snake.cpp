@@ -77,8 +77,8 @@ void runSnake(sf::RenderWindow& window) {
 	bool isPaused = false;
 	const int CELL_SIZE = 32;
 	auto size = window.getSize();
-	const int TARGET = static_cast<int>(std::min(size.x,size.y)* 0.78f);
-	const int PLAY_HEIGHT = (TARGET / CELL_SIZE)* CELL_SIZE;
+	const int TARGET = static_cast<int>(std::min(size.x, size.y) * 0.78f);
+	const int PLAY_HEIGHT = (TARGET / CELL_SIZE) * CELL_SIZE;
 	const int PLAY_WIDTH = PLAY_HEIGHT;
 	const int COLS = PLAY_HEIGHT / CELL_SIZE;
 	const int ROWS = PLAY_WIDTH / CELL_SIZE;
@@ -165,9 +165,13 @@ void runSnake(sf::RenderWindow& window) {
 		});
 	rect.setFillColor(sf::Color::White);
 
-	sf::Texture appleTexture;
-	appleTexture.loadFromFile("assets/apple.png");
-	sf::Sprite appleSprite(appleTexture);
+	std::vector<sf::Texture> foodTextures(4);
+	foodTextures[0].loadFromFile("assets/brain.png");
+	foodTextures[1].loadFromFile("assets/heart.png");
+	foodTextures[2].loadFromFile("assets/lungs.png");
+	foodTextures[3].loadFromFile("assets/stomach.png");
+	int currentFood = std::rand() % 4;
+	sf::Sprite foodSprite(foodTextures[currentFood]);
 
 	sf::SoundBuffer eatSoundBuffer;
 	sf::Sound eatSound(eatSoundBuffer);
@@ -179,10 +183,10 @@ void runSnake(sf::RenderWindow& window) {
 	sf::Text scoreText(font);
 	scoreText.setCharacterSize(24);
 	scoreText.setFillColor(sf::Color::White);
-	scoreText.setPosition({ 
+	scoreText.setPosition({
 		static_cast<float>(OFFSETX),
-		static_cast<float>(OFFSETY - 2 * CELL_SIZE ) 
-	});
+		static_cast<float>(OFFSETY - 2 * CELL_SIZE)
+		});
 
 	sf::Clock clock;
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
@@ -244,15 +248,17 @@ void runSnake(sf::RenderWindow& window) {
 				eatSound.play();
 				snake.grow();
 				score++;
+				currentFood = std::rand() % 4;
+				foodSprite.setTexture(foodTextures[currentFood]);
 				if (score > highScore) {
 					highScore = score;
 					saveHighScore(highScore);
 				}
-				
+
 			}
 		}
 
-		appleSprite.setPosition({
+		foodSprite.setPosition({
 			static_cast<float>(OFFSETX + snake.getFoodPosition().x * CELL_SIZE),
 			static_cast<float>(OFFSETY + snake.getFoodPosition().y * CELL_SIZE)
 			});
@@ -279,12 +285,12 @@ void runSnake(sf::RenderWindow& window) {
 
 		scoreText.setCharacterSize(24);
 		scoreText.setString("Score: " + std::to_string(score) + "  High Score: " + std::to_string(highScore) + "  Lives: " + std::to_string(lives));
-		scoreText.setPosition({ 
+		scoreText.setPosition({
 			static_cast<float>(OFFSETX),
-			static_cast<float>(OFFSETY - 2 * CELL_SIZE ) 
-		});
+			static_cast<float>(OFFSETY - 2 * CELL_SIZE)
+			});
 		window.draw(scoreText);
-		window.draw(appleSprite);
+		window.draw(foodSprite);
 		for (auto& segment : snake.getBody()) {
 			rect.setPosition({
 				static_cast<float>(OFFSETX + segment.x * CELL_SIZE),

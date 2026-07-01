@@ -85,6 +85,14 @@ void runSnake(sf::RenderWindow& window) {
 	const int OFFSETX = (size.x - PLAY_WIDTH) / 2;
 	const int OFFSETY = (size.y - PLAY_HEIGHT) / 2;
 
+	//bg music for snake (pungi) 
+	sf::Music bgMusicSnake;
+	if (bgMusicSnake.openFromFile("audio/background_snake.wav")) {
+		bgMusicSnake.setLooping(true);   
+		bgMusicSnake.setVolume(30.f);    
+		bgMusicSnake.play();
+	}
+
 	sf::Texture offsetTexture;
 	offsetTexture.loadFromFile("./assets/offset.png");
 	offsetTexture.setRepeated(true);

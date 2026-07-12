@@ -68,8 +68,37 @@ const std::deque<sf::Vector2i>& Snake::getBody() const {
 	return body;
 }
 
+sf::Vector2i Snake::getDirection() const {
+	return direction;
+}
 sf::Vector2i Snake::getHead() const {
 	return body.front();
+}
+
+//Direction to rotation angle
+float directionToRotation(sf::Vector2i dir) {
+	if (dir == sf::Vector2i{ 0, 1 })  return 0.f;
+	if (dir == sf::Vector2i{ 0, -1 }) return 180.f;
+	if (dir == sf::Vector2i{ 1, 0 })  return 270.f;
+	if (dir == sf::Vector2i{ -1, 0 }) return 90.f;
+	return 0.f;
+}
+// corner direction 
+float cornerRotation(sf::Vector2i a, sf::Vector2i b) {
+	sf::Vector2i top{ 0,-1 }, right{ 1,0 }, bottom{ 0,1 }, left{ -1,0 };
+
+	if ((a == top && b == right) || (a == right && b == top)) return 0.f;
+	if ((a == right && b == bottom) || (a == bottom && b == right)) return 90.f;
+	if ((a == bottom && b == left) || (a == left && b == bottom)) return 180.f;
+	if ((a == left && b == top) || (a == top && b == left)) return 270.f;
+	return 0.f;
+}
+
+void setupSnakeSprite(sf::Sprite& sprite, sf::Texture& tex) {
+	sf::Vector2u size = tex.getSize();
+	sprite.setOrigin({ size.x / 2.f, size.y / 2.f });
+	float scale = 32.f / std::max(size.x, size.y);
+	sprite.setScale({ scale, scale });
 }
 
 // ---------------- Game loop ----------------
@@ -88,6 +117,31 @@ void runSnake(sf::RenderWindow& window) {
 	const int ROWS = PLAY_WIDTH / CELL_SIZE;
 	const int OFFSETX = (size.x - PLAY_WIDTH) / 2;
 	const int OFFSETY = (size.y - PLAY_HEIGHT) / 2;
+
+	//snake body parts 
+	sf::Texture headTexture, bodyTexture, tailTexture,cornerTexture;
+	headTexture.loadFromFile("assets/snake_head1.png");
+	bodyTexture.loadFromFile("assets/snake_body1.png");
+	tailTexture.loadFromFile("assets/snake_tail1.png");
+	cornerTexture.loadFromFile("assets/body_corner.png");
+
+	sf::Sprite headSprite(headTexture);
+	sf::Sprite bodySprite(bodyTexture);
+	sf::Sprite tailSprite(tailTexture);
+	sf::Sprite cornerSprite(cornerTexture);
+
+
+	// set origin+scale consistently for all three for proper rotation
+	auto setupSnakeSprite = [](sf::Sprite& sprite, sf::Texture& tex) {
+		sf::Vector2u size = tex.getSize();
+		sprite.setOrigin({ size.x / 2.f, size.y / 2.f });
+		float scale = 32.f / std::max(size.x, size.y);
+		sprite.setScale({ scale, scale });
+		};
+	setupSnakeSprite(headSprite, headTexture);
+	setupSnakeSprite(bodySprite, bodyTexture);
+	setupSnakeSprite(tailSprite, tailTexture);
+	setupSnakeSprite(cornerSprite, cornerTexture);
 
 	//bg music for snake (pungi) 
 	sf::Music bgMusicSnake;
@@ -303,12 +357,45 @@ void runSnake(sf::RenderWindow& window) {
 			});
 		window.draw(scoreText);
 		window.draw(foodSprite);
-		for (auto& segment : snake.getBody()) {
-			rect.setPosition({
-				static_cast<float>(OFFSETX + segment.x * CELL_SIZE),
-				static_cast<float>(OFFSETY + segment.y * CELL_SIZE)
-				});
-			window.draw(rect);
+
+		//draw snake's body
+		const auto& body = snake.getBody();
+
+		for (int i = 0; i < body.size(); i++) {
+			sf::Vector2i pos = body[i];
+			float centerX = OFFSETX + pos.x * CELL_SIZE + CELL_SIZE / 2.f;
+			float centerY = OFFSETY + pos.y * CELL_SIZE + CELL_SIZE / 2.f;
+
+			if (i == 0) {
+				// head
+				headSprite.setRotation(sf::degrees(directionToRotation(snake.getDirection())));
+				headSprite.setPosition({ centerX, centerY });
+				window.draw(headSprite);
+			}
+			else if (i == body.size() - 1) {
+				// tail
+				sf::Vector2i segDir = body[i - 1] - pos;
+				tailSprite.setRotation(sf::degrees(directionToRotation(segDir)));
+				tailSprite.setPosition({ centerX, centerY });
+				window.draw(tailSprite);
+			}
+			else {
+				sf::Vector2i dirToHead = body[i - 1] - pos;
+				sf::Vector2i dirToTail = body[i + 1] - pos;
+
+				bool isStraight = (dirToHead.x + dirToTail.x == 0) && (dirToHead.y + dirToTail.y == 0);
+
+				if (isStraight) {
+					bodySprite.setRotation(sf::degrees(directionToRotation(dirToHead)));
+					bodySprite.setPosition({ centerX, centerY });
+					window.draw(bodySprite);
+				}
+				else {
+					cornerSprite.setRotation(sf::degrees(cornerRotation(dirToHead, dirToTail)));
+					cornerSprite.setPosition({ centerX, centerY });
+					window.draw(cornerSprite);
+				}
+			}
 		}
 
 		window.display();

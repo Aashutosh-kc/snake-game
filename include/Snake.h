@@ -1,16 +1,28 @@
-#ifndef SNAKE_H
-#define SNAKE_H
+#pragma once
 
 #include <SFML/System/Vector2.hpp>
 #include <deque>
 
+struct SnakeLayout {
+    int cellSize;
+    int cols;
+    int rows;
+    int playWidth;
+    int playHeight;
+    int offsetX;
+    int offsetY;
+};
+
 class Snake {
 public:
-
-    Snake(sf::Vector2i startPos, sf::Vector2i startDir, int cols, int rows);
+    Snake(
+        sf::Vector2i startPos,
+        sf::Vector2i startDir,
+        int cols,
+        int rows
+    );
 
     // Movement
-    sf::Vector2i nextDirection;
     void setDirection(sf::Vector2i dir);
     void move();
     void grow();
@@ -21,23 +33,27 @@ public:
     bool checkFoodCollision() const;
 
     // Food
-    void respawnFood();
+    bool respawnFood();
     sf::Vector2i getFoodPosition() const;
 
-    //Getters 
+    // Getters
     sf::Vector2i getDirection() const;
-    // Restart
-    void reset(sf::Vector2i startPos, sf::Vector2i startDir);
     const std::deque<sf::Vector2i>& getBody() const;
     sf::Vector2i getHead() const;
 
+    // Restart / respawn
+    void reset(sf::Vector2i startPos, sf::Vector2i startDir);
+    void respawn(sf::Vector2i pos, sf::Vector2i dir);
+
 private:
     std::deque<sf::Vector2i> body;
+
     sf::Vector2i direction;
+    sf::Vector2i nextDirection;
     sf::Vector2i foodPos;
 
     int cols;
     int rows;
-};
 
-#endif
+    bool growPending = false;
+};

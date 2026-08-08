@@ -92,14 +92,33 @@ void Snake::respawn(
     nextDirection = dir;
     growPending = false;
 
+    std::vector<sf::Vector2i> path;
+    path.reserve(length);
+
+    int col = pos.x;
+    int row = pos.y;
+    int stepX = (dir.x >= 0) ? -1 : 1; // tail extends opposite to travel direction
+
     for (std::size_t i = 0; i < length; ++i) {
-        body.push_back({
-            pos.x - dir.x * static_cast<int>(i),
-            pos.y - dir.y * static_cast<int>(i)
-            });
+        path.push_back({ col, row });
+
+        const int nextCol = col + stepX;
+
+        if (nextCol >= 0 && nextCol < cols) {
+            col = nextCol;
+        }
+        else {
+            row = (row + 1) % rows;  // drop to next row (wrap if needed)
+            stepX = -stepX;          // reverse direction for the new row
+            // col stays the same -> this cell is directly below/above
+            // the previous one, so the path stays unbroken
+        }
+    }
+
+    for (const auto& segment : path) {
+        body.push_back(segment);
     }
 }
-
 void Snake::setDirection(sf::Vector2i dir) {
     if (dir.x == -direction.x &&
         dir.y == -direction.y) {

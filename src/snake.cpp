@@ -119,6 +119,7 @@ void Snake::respawn(
         body.push_back(segment);
     }
 }
+
 void Snake::setDirection(sf::Vector2i dir) {
     if (dir.x == -direction.x &&
         dir.y == -direction.y) {
@@ -189,6 +190,13 @@ bool Snake::respawnFood() {
             }
         }
 
+        for (const auto& obstacle : obstacles) {
+            if (obstacle == candidate) {
+                occupied = true;
+                break;
+            }
+        }
+
         if (!occupied) {
             foodPos = candidate;
             return true;
@@ -208,6 +216,13 @@ bool Snake::respawnFood() {
                 }
             }
 
+            for (const auto& obstacle : obstacles) {
+                if (obstacle == candidate) {
+                    occupied = true;
+                    break;
+                }
+            }
+
             if (!occupied) {
                 foodPos = candidate;
                 return true;
@@ -216,6 +231,56 @@ bool Snake::respawnFood() {
     }
 
     return false;
+}
+
+void Snake::spawnObstacles(int count) {
+    obstacles.clear();
+
+    for (int i = 0; i < count; ++i) {
+        for (int attempt = 0; attempt < 100; ++attempt) {
+            const sf::Vector2i candidate{
+                std::rand() % cols,
+                std::rand() % rows
+            };
+
+            bool occupied = (candidate == foodPos);
+
+            for (const auto& segment : body) {
+                if (segment == candidate) {
+                    occupied = true;
+                    break;
+                }
+            }
+
+            for (const auto& obstacle : obstacles) {
+                if (obstacle == candidate) {
+                    occupied = true;
+                    break;
+                }
+            }
+
+            if (!occupied) {
+                obstacles.push_back(candidate);
+                break;
+            }
+        }
+    }
+}
+
+bool Snake::checkObstacleCollision() const {
+    const sf::Vector2i head = body.front();
+
+    for (const auto& obstacle : obstacles) {
+        if (obstacle == head) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const std::vector<sf::Vector2i>& Snake::getObstacles() const {
+    return obstacles;
 }
 
 sf::Vector2i Snake::getFoodPosition() const {
@@ -236,9 +301,11 @@ sf::Vector2i Snake::getHead() const {
 
 void runSnake(sf::RenderWindow& window) {
     constexpr int CELL_SIZE = 32;
-    
-    float moveInterval = 0.2f;
-    const float minInterval = 0.08f;
+    constexpr float BASE_MOVE_INTERVAL = 0.2f;
+    constexpr float MIN_MOVE_INTERVAL = 0.08f;
+
+    float moveInterval = BASE_MOVE_INTERVAL;
+
     const sf::Vector2u windowSize = window.getSize();
 
     const int target =
@@ -292,6 +359,8 @@ void runSnake(sf::RenderWindow& window) {
         rows
     );
 
+    snake.spawnObstacles(5);
+
     int lives = 3;
     int score = 0;
     int highScore = loadHighScore();
@@ -337,6 +406,7 @@ void runSnake(sf::RenderWindow& window) {
 
                     lives = 3;
                     score = 0;
+                    moveInterval = BASE_MOVE_INTERVAL;
 
                     gameOver = false;
                     won = false;
@@ -348,6 +418,7 @@ void runSnake(sf::RenderWindow& window) {
                     );
 
                     snake.respawnFood();
+                    snake.spawnObstacles(5);
 
                     moveClock.restart();
                 }
@@ -397,7 +468,8 @@ void runSnake(sf::RenderWindow& window) {
             moveClock.restart();
 
             if (snake.checkWallCollision() ||
-                snake.checkSelfCollision()) {
+                snake.checkSelfCollision() ||
+                snake.checkObstacleCollision()) {
 
                 --lives;
 
@@ -419,7 +491,8 @@ void runSnake(sf::RenderWindow& window) {
                 snake.grow();
 
                 ++score;
-                if (moveInterval > minInterval) {
+
+                if (moveInterval > MIN_MOVE_INTERVAL) {
                     moveInterval -= 0.005f;
                 }
 
@@ -460,11 +533,28 @@ void runSnake(sf::RenderWindow& window) {
 
         assets.drawBackground(window);
 
+        for (const auto& obstacle : snake.getObstacles()) {
+            assets.getObstacleSprite().setPosition({
+                static_cast<float>(
+                    offsetX +
+                    obstacle.x * CELL_SIZE +
+                    CELL_SIZE / 2
+                ),
+                static_cast<float>(
+                    offsetY +
+                    obstacle.y * CELL_SIZE +
+                    CELL_SIZE / 2
+                )
+                });
+
+            window.draw(assets.getObstacleSprite());
+        }
+
         if (gameOver) {
             scoreText.setCharacterSize(32);
 
             scoreText.setString(
-                (won ? "You Win!" : "Game Over!") +
+                (won ? "\t You Win!" : "\t Game Over!") +
                 std::string(
                     "\n\nScore: "
                 ) +
@@ -625,6 +715,7 @@ void runSnake(sf::RenderWindow& window) {
                 }
             }
         }
+
         if (paused) {
             scoreText.setCharacterSize(32);
 
@@ -646,7 +737,6 @@ void runSnake(sf::RenderWindow& window) {
             window.draw(scoreText);
         }
 
-     
         window.display();
     }
 }

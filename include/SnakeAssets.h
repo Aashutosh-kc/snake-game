@@ -65,6 +65,10 @@ public:
         return cornerSprite;
     }
 
+    sf::Sprite& getObstacleSprite() {
+        return obstacleSprite;
+    }
+
 private:
     // Textures
     sf::Texture offsetTexture;
@@ -79,6 +83,7 @@ private:
     sf::Texture bodyTexture;
     sf::Texture tailTexture;
     sf::Texture cornerTexture;
+    sf::Texture obstacleTexture;
 
     sf::Texture foodTextures[4];
 
@@ -95,6 +100,7 @@ private:
     sf::Sprite bodySprite;
     sf::Sprite tailSprite;
     sf::Sprite cornerSprite;
+    sf::Sprite obstacleSprite;
 
     sf::Sprite foodSprite;
 

@@ -6,17 +6,18 @@
 
 SnakeAssets::SnakeAssets()
     : offsetSprite(offsetTexture),
-      grassSprite(grassTexture),
-      borderH1Sprite(borderH1Texture),
-      borderV1Sprite(borderV1Texture),
-      borderH2Sprite(borderH2Texture),
-      borderV2Sprite(borderV2Texture),
-      headSprite(headTexture),
-      bodySprite(bodyTexture),
-      tailSprite(tailTexture),
-      cornerSprite(cornerTexture),
-      foodSprite(foodTextures[0]),
-      eatSound(eatSoundBuffer) {
+    grassSprite(grassTexture),
+    borderH1Sprite(borderH1Texture),
+    borderV1Sprite(borderV1Texture),
+    borderH2Sprite(borderH2Texture),
+    borderV2Sprite(borderV2Texture),
+    headSprite(headTexture),
+    bodySprite(bodyTexture),
+    tailSprite(tailTexture),
+    cornerSprite(cornerTexture),
+    obstacleSprite(obstacleTexture),
+    foodSprite(foodTextures[0]),
+    eatSound(eatSoundBuffer) {
 }
 
 bool SnakeAssets::loadTexture(
@@ -46,17 +47,17 @@ void SnakeAssets::setupSnakeSprite(
     sprite.setOrigin({
         size.x / 2.f,
         size.y / 2.f
-    });
+        });
 
     const float scale =
         32.f / static_cast<float>(
             std::max(size.x, size.y)
-        );
+            );
 
     sprite.setScale({
         scale,
         scale
-    });
+        });
 }
 
 bool SnakeAssets::loadAll(
@@ -90,6 +91,14 @@ bool SnakeAssets::loadAll(
     setupSnakeSprite(bodySprite, bodyTexture);
     setupSnakeSprite(tailSprite, tailTexture);
     setupSnakeSprite(cornerSprite, cornerTexture);
+
+    // Obstacle texture
+    ok = loadTexture(
+        obstacleTexture,
+        "assets/obstacle.png"
+    ) && ok;
+
+    setupSnakeSprite(obstacleSprite, obstacleTexture);
 
     // Food textures
     static const char* foodPaths[4] = {
@@ -149,7 +158,7 @@ bool SnakeAssets::loadAll(
     grassSprite.setPosition({
         static_cast<float>(layout.offsetX),
         static_cast<float>(layout.offsetY)
-    });
+        });
 
     // Top border
     ok = loadTexture(
@@ -174,7 +183,7 @@ bool SnakeAssets::loadAll(
         static_cast<float>(
             layout.offsetY - layout.cellSize
         )
-    });
+        });
 
     // Left border
     ok = loadTexture(
@@ -199,7 +208,7 @@ bool SnakeAssets::loadAll(
             layout.offsetX - layout.cellSize
         ),
         static_cast<float>(layout.offsetY)
-    });
+        });
 
     // Bottom border
     ok = loadTexture(
@@ -224,7 +233,7 @@ bool SnakeAssets::loadAll(
         static_cast<float>(
             layout.offsetY + layout.playHeight
         )
-    });
+        });
 
     // Right border
     ok = loadTexture(
@@ -249,7 +258,7 @@ bool SnakeAssets::loadAll(
             layout.offsetX + layout.playWidth
         ),
         static_cast<float>(layout.offsetY)
-    });
+        });
 
     // Font
     if (!font.openFromFile("fonts/regular.ttf")) {
@@ -301,18 +310,18 @@ void SnakeAssets::randomizeFoodTexture() {
         foodSprite.setOrigin({
             foodSize.x / 2.f,
             foodSize.y / 2.f
-        });
+            });
 
         // Slightly smaller than the cell so it has some spacing.
         const float foodScale =
             26.f / static_cast<float>(
                 std::max(foodSize.x, foodSize.y)
-            );
+                );
 
         foodSprite.setScale({
             foodScale,
             foodScale
-        });
+            });
     }
 }
 
@@ -327,4 +336,3 @@ void SnakeAssets::drawBackground(
     window.draw(borderH2Sprite);
     window.draw(borderV2Sprite);
 }
-

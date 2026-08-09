@@ -163,7 +163,7 @@ bool SnakeAssets::loadAll(
     // Top border
     ok = loadTexture(
         borderH1Texture,
-        "assets/border_horizontal1.png"
+        "assets/barrel.png"
     ) && ok;
 
     borderH1Texture.setRepeated(true);
@@ -188,7 +188,7 @@ bool SnakeAssets::loadAll(
     // Left border
     ok = loadTexture(
         borderV1Texture,
-        "assets/border_vertical.png"
+        "assets/barrel.png"
     ) && ok;
 
     borderV1Texture.setRepeated(true);
@@ -213,7 +213,7 @@ bool SnakeAssets::loadAll(
     // Bottom border
     ok = loadTexture(
         borderH2Texture,
-        "assets/border_horizontal.png"
+        "assets/barrel.png"
     ) && ok;
 
     borderH2Texture.setRepeated(true);
@@ -238,7 +238,7 @@ bool SnakeAssets::loadAll(
     // Right border
     ok = loadTexture(
         borderV2Texture,
-        "assets/border_vertical2.png"
+        "assets/barrel.png"
     ) && ok;
 
     borderV2Texture.setRepeated(true);

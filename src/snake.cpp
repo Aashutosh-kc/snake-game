@@ -236,8 +236,9 @@ sf::Vector2i Snake::getHead() const {
 
 void runSnake(sf::RenderWindow& window) {
     constexpr int CELL_SIZE = 32;
-    constexpr float MOVE_INTERVAL = 0.2f;
-
+    
+    float moveInterval = 0.2f;
+    const float minInterval = 0.08f;
     const sf::Vector2u windowSize = window.getSize();
 
     const int target =
@@ -390,7 +391,7 @@ void runSnake(sf::RenderWindow& window) {
         if (!gameOver &&
             !paused &&
             moveClock.getElapsedTime().asSeconds()
-            >= MOVE_INTERVAL) {
+            >= moveInterval) {
 
             snake.move();
             moveClock.restart();
@@ -413,12 +414,14 @@ void runSnake(sf::RenderWindow& window) {
                 }
             }
 
-            if (!gameOver &&
-                snake.checkFoodCollision()) {
+            if (!gameOver && snake.checkFoodCollision()) {
 
                 snake.grow();
 
                 ++score;
+                if (moveInterval > minInterval) {
+                    moveInterval -= 0.005f;
+                }
 
                 if (score > highScore) {
                     highScore = score;
@@ -622,7 +625,28 @@ void runSnake(sf::RenderWindow& window) {
                 }
             }
         }
+        if (paused) {
+            scoreText.setCharacterSize(32);
 
+            scoreText.setString("\t\t  Paused\n\nPress P or Space to Resume");
+
+            const sf::FloatRect bounds =
+                scoreText.getLocalBounds();
+
+            scoreText.setPosition({
+                static_cast<float>(
+                    window.getSize().x / 2
+                ) - bounds.size.x / 2 - bounds.position.x,
+
+                static_cast<float>(
+                    window.getSize().y / 2
+                ) - bounds.size.y / 2 - bounds.position.y
+                });
+
+            window.draw(scoreText);
+        }
+
+     
         window.display();
     }
 }

@@ -1,6 +1,9 @@
 # Snake Game
 A classic snake game featuring score tracking and audio functionality made using C++ and SFML.
 
+## Preview
+<img src = ./preview/game_v1.png  height = 500 />
+
 ## Built with
 <table>
     <tr>

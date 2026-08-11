@@ -17,7 +17,8 @@ SnakeAssets::SnakeAssets()
     cornerSprite(cornerTexture),
     obstacleSprite(obstacleTexture),
     foodSprite(foodTextures[0]),
-    eatSound(eatSoundBuffer) {
+    eatSound(eatSoundBuffer) ,
+    crashSound(crashSoundBuffer), brokenWallSprite(brokenWallTexture) {
 }
 
 bool SnakeAssets::loadTexture(
@@ -99,6 +100,13 @@ bool SnakeAssets::loadAll(
     ) && ok;
 
     setupSnakeSprite(obstacleSprite, obstacleTexture);
+
+    ok = loadTexture(
+        brokenWallTexture,
+        "assets/broken_wall.png"
+    ) && ok;
+
+    setupSnakeSprite(brokenWallSprite, brokenWallTexture);
 
     // Food textures
     static const char* foodPaths[4] = {
@@ -289,6 +297,17 @@ bool SnakeAssets::loadAll(
         std::cerr
             << "Failed to load: "
             << "audio/food_crunch.mp3\n";
+    }
+    // Crash sound
+    if (crashSoundBuffer.loadFromFile(
+        "audio/crash.wav"
+    )) {
+        crashSound.setVolume(100.f);
+    }
+    else {
+        std::cerr
+            << "Failed to load: "
+            << "audio/crash.wav\n";
     }
 
     return ok;

@@ -306,6 +306,11 @@ void runSnake(sf::RenderWindow& window) {
 
     float moveInterval = BASE_MOVE_INTERVAL;
 
+    bool hasBrokenWall = false;
+    sf::Vector2i brokenWallCell{ 0, 0 };
+    sf::Clock brokenWallClock;
+    constexpr float BROKEN_WALL_DURATION = 1.5f; // seconds the crack stays visible
+
     const sf::Vector2u windowSize = window.getSize();
 
     const int target =
@@ -408,9 +413,11 @@ void runSnake(sf::RenderWindow& window) {
                     score = 0;
                     moveInterval = BASE_MOVE_INTERVAL;
 
+                    hasBrokenWall = false;
                     gameOver = false;
                     won = false;
                     paused = false;
+
 
                     snake.reset(
                         { 5, 5 },
@@ -471,7 +478,14 @@ void runSnake(sf::RenderWindow& window) {
                 snake.checkSelfCollision() ||
                 snake.checkObstacleCollision()) {
 
+                if (snake.checkWallCollision()) {
+                    hasBrokenWall = true;
+                    brokenWallCell = snake.getHead();
+                    brokenWallClock.restart();
+                }
+
                 --lives;
+                assets.getCrashSound().play();
 
                 if (lives <= 0) {
                     gameOver = true;
@@ -548,6 +562,25 @@ void runSnake(sf::RenderWindow& window) {
                 });
 
             window.draw(assets.getObstacleSprite());
+        }
+
+        if (hasBrokenWall &&
+            brokenWallClock.getElapsedTime().asSeconds() < BROKEN_WALL_DURATION) {
+
+            assets.getBrokenWallSprite().setPosition({
+                static_cast<float>(
+                    offsetX +
+                    brokenWallCell.x * CELL_SIZE +
+                    CELL_SIZE / 2
+                ),
+                static_cast<float>(
+                    offsetY +
+                    brokenWallCell.y * CELL_SIZE +
+                    CELL_SIZE / 2
+                )
+                });
+
+            window.draw(assets.getBrokenWallSprite());
         }
 
         if (gameOver) {

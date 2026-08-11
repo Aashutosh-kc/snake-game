@@ -45,6 +45,10 @@ public:
         return eatSound;
     }
 
+    sf::Sound& getCrashSound() {
+        return crashSound;
+    }
+
     sf::Sprite& getFoodSprite() {
         return foodSprite;
     }
@@ -68,6 +72,9 @@ public:
     sf::Sprite& getObstacleSprite() {
         return obstacleSprite;
     }
+    sf::Sprite& getBrokenWallSprite() {
+        return brokenWallSprite;
+    }
 
 private:
     // Textures
@@ -84,6 +91,8 @@ private:
     sf::Texture tailTexture;
     sf::Texture cornerTexture;
     sf::Texture obstacleTexture;
+    sf::Texture brokenWallTexture;
+    sf::Sprite brokenWallSprite;
 
     sf::Texture foodTextures[4];
 
@@ -108,6 +117,8 @@ private:
     sf::Music bgMusic;
     sf::SoundBuffer eatSoundBuffer;
     sf::Sound eatSound;
+    sf::SoundBuffer crashSoundBuffer;
+    sf::Sound crashSound;
 
     // Font
     sf::Font font;

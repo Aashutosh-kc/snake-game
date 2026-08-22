@@ -373,7 +373,7 @@ void runSnake(sf::RenderWindow& window) {
     bool gameOver = false;
     bool won = false;
     bool paused = false;
-
+    bool started = false;
     sf::Clock moveClock;
 
     sf::Text scoreText(assets.getFont());
@@ -397,6 +397,10 @@ void runSnake(sf::RenderWindow& window) {
                     return;
                 }
 
+                if (key == sf::Keyboard::Key::Enter && !started) {
+                    started = true;
+                    moveClock.restart();
+                }
                 if (key == sf::Keyboard::Key::P ||
                     key == sf::Keyboard::Key::Space) {
 
@@ -432,7 +436,9 @@ void runSnake(sf::RenderWindow& window) {
             }
         }
 
-        if (!gameOver && !paused) {
+        if (started && !gameOver && !paused) {
+
+       
             if (sf::Keyboard::isKeyPressed(
                 sf::Keyboard::Key::W) ||
                 sf::Keyboard::isKeyPressed(
@@ -466,7 +472,8 @@ void runSnake(sf::RenderWindow& window) {
             }
         }
 
-        if (!gameOver &&
+        if (started && 
+            !gameOver &&
             !paused &&
             moveClock.getElapsedTime().asSeconds()
             >= moveInterval) {
@@ -546,6 +553,37 @@ void runSnake(sf::RenderWindow& window) {
         window.clear(sf::Color(10, 10, 10));
 
         assets.drawBackground(window);
+
+        if (!started) {
+            scoreText.setCharacterSize(32);
+
+            scoreText.setString(
+                "\t\t SNAKE"
+                "\n\n"
+                "  WASD / Arrows - Move\n"
+                "    P / Space - Pause\n"
+                "\t  Esc - Quit\n\n"
+                "  Press Enter to Start"
+            );
+
+            const sf::FloatRect bounds =
+                scoreText.getLocalBounds();
+
+            scoreText.setPosition({
+                static_cast<float>(
+                    window.getSize().x / 2
+                ) - bounds.size.x / 2,
+
+                static_cast<float>(
+                    window.getSize().y / 2
+                ) - bounds.size.y / 2
+                });
+
+            window.draw(scoreText);
+            window.display();
+
+            continue;
+        }
 
         for (const auto& obstacle : snake.getObstacles()) {
             assets.getObstacleSprite().setPosition({

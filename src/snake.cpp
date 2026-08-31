@@ -818,7 +818,10 @@ int main() {
         "Snake",
         sf::State::Fullscreen
     );
-
+    sf::Image icon;
+    if (icon.loadFromFile("assets/icon.png")) {
+        window.setIcon(icon.getSize(), icon.getPixelsPtr());
+    }
     runSnake(window);
 
     return 0;

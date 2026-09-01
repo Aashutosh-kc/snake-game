@@ -1,8 +1,6 @@
+# <p align="center"><img src="assets/icon.png" alt="Snake Game Icon" width="75" /></p><p align="center">   Snake Game</p>
 
-
-# <img src="assets/icon.png" alt="Snake Game Icon" width="30" align="center">   Snake Game
-
-A classic snake game featuring score tracking and audio functionality made using C++ and SFML.
+<p align="center" >A classic snake game featuring score tracking and audio functionality made using C++ and SFML.</p>
 
 ## Built with
 <table>
